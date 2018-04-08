@@ -68,6 +68,7 @@ cd <project name>
 	$ scrapy crawl country -s LOG_LEVEL=ERROR / DEBUG
 	使用crawl命令加爬虫名称来运行爬虫， LOG_LEVEL 是设置日志级别 ERROR显示错误信息， DEBUG显示所有信息
 
-	
 
-
+使用shell命令抓取:
+	scrapy shell http://example.webscraping.com/view/United-Kingdom-239
+	可以进行交互
