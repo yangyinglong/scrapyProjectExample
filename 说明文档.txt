@@ -1,0 +1,73 @@
+安装Scrapy:
+	sudo pip install Scrapy
+
+查看版本:
+	scrapy -h
+
+进入保存项目文件目录:
+	cd ..
+
+创建项目:name
+	scrapy startproject <project name>
+
+cd <project name>
+	scrapy.cfg				#设置项目配置
+	<project name>/	
+		__init__.py  
+		middlewares.py  	
+		settings.py			#该文件定义了一些设置，如用户代理、爬取延时等
+		items.py            #该文件定义了待抓取域的模型  
+		pipelines.py        #该文件处理要抓取的域
+		spiders/			#该目录存储实际的爬虫代码
+			__init__.py
+
+编写 items.py 文件：
+	在类中定义国家名称和人口数量
+	name = scrapy.Field()
+	population = scrapy.Field()
+
+编写爬虫:
+	$ scrapy genspider country example.webscraping.com --template=crawl
+	用scrapy genspider 命令，传入爬虫名、域名、以及可选的模块参数，使用内置的crawl模块创建country
+	然后在spiders目录下，自动生成 country.py 文件如下：
+
+	# -*- coding: utf-8 -*-
+	import scrapy
+	from scrapy.linkextractors import LinkExtractor
+	from scrapy.spiders import CrawlSpider, Rule
+
+	from example.items import ExampleItem
+
+
+	class CountrySpider(CrawlSpider):
+	    name = 'country'   #该属性为定义爬虫名称的字符串
+	    allowed_domains = ['example.webscraping.com']  #该属性定义了可爬取的域名列表，如果没有定义该属性，则表示可以爬取任何域名
+	    start_urls = ['http://example.webscraping.com/']     #该属性定义了爬虫起始URL列表。
+
+	    rules = (
+	        Rule(LinkExtractor(allow=r'Items/'), callback='parse_item', follow=True),
+	    )    #该属性为一个正则表达式集合，用于告知爬虫需要跟踪哪些链接
+	    	 #callback函数用于解析下载得到的相应
+
+	    #parse_item()函数提供了一个从相应中获取数据的例子CON
+
+	    def parse_item(self, response):
+	        i = ExampleItem()
+	        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
+	        #i['name'] = response.xpath('//div[@id="name"]').extract()
+	        #i['description'] = response.xpath('//div[@id="description"]').extract()
+	        return i
+
+优化设置:
+	默认情况下，Scrapy对同一域名允许最多8个并发下载，并且两次下载之间没有延时，这样很容易被查封
+	所以在settings.py中添加如下，使爬虫同时最多只能对每个域名发起一个请求，并且两次请求之间存在延时
+	CONCURRENT_REQUESTS_PER_DOMAIN = 1
+	DOWNLOAD_DELAY = 5
+
+测试爬虫:
+	$ scrapy crawl country -s LOG_LEVEL=ERROR / DEBUG
+	使用crawl命令加爬虫名称来运行爬虫， LOG_LEVEL 是设置日志级别 ERROR显示错误信息， DEBUG显示所有信息
+
+	
+
+
