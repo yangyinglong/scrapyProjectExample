@@ -70,5 +70,36 @@ cd <project name>
 
 
 使用shell命令抓取:
-	scrapy shell http://example.webscraping.com/view/United-Kingdom-239
-	可以进行交互
+	scrapy shell http://example.webscraping.com/places/default/view/Afghanistan-1
+	可以进行交互来抓取信息
+	如：
+		response.url
+		response.status
+		response.text
+		response.css('').exreact()
+
+在country.py文件中编写parse_item()方法:
+	def parse_item(self, response):
+        item = ExampleItem()
+        name_css = 'tr#places_country__row td.w2p_fw::text'
+        item['name'] = response.css(name_css).extract()
+        pop_css = 'tr#places_population_row td.w2p_fw::text'
+        item['population'] = response.css(pop_css).extract()
+        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
+        #i['name'] = response.xpath('//div[@id="name"]').extract()
+        #i['description'] = response.xpath('//div[@id="description"]').extract()
+        return item
+
+检查结果:
+	$ scrapy crawl country --output=countries.csv -s LOG_LEVEL=INFO
+	可以在parse_item()方法中添加保存结果的代码，
+	也可以在--output选项中添加csv,json,xml格式的文件来保存结果
+
+中断和恢复爬虫:
+	$ scrapy crawl country -s LOG_LEVEL=DEBUG -s JOBDIR=crawls/country
+	按下ctrl + c 之后，爬虫又完成了几个条目的处理之后才终止，这样才能保存爬虫状态，
+	不能再次按下ctrl + c强行终止，
+	之后输入同样的命令继续从暂停的地方恢复运行
+
+
+
